@@ -3,7 +3,7 @@ seq(samskivert.POMUtil.pomToSettings("pom.xml") :_*)
 crossPaths := false
 
 javacOptions ++= Seq(
-  "-Xlint", "-Xlint:-serial", "-source", "1.6", "-target", "1.6"
+  "-Xlint", "-Xlint:-serial", "-source", "1.8", "-target", "1.8"
 )
 
 autoScalaLibrary := false // no scala-library dependency

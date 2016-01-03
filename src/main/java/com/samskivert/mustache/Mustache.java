@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * Provides <a href="http://mustache.github.com/">Mustache</a> templating services.
- *
+ * <p>
  * <p> Basic usage:
  * <pre>{@code
  * String source = "Hello {{arg}}!";
@@ -26,191 +26,245 @@ import java.util.Map;
  * tmpl.execute(context); // returns "Hello world!"
  * }</pre>
  */
-public class Mustache
-{
-    /** Compiles templates into executable form. See {@link Mustache}. */
-    public static class Compiler
-    {
-        /** Whether or not standards mode is enabled. */
+public class Mustache {
+    /**
+     * Compiles templates into executable form. See {@link Mustache}.
+     */
+    public static class Compiler {
+        /**
+         * Whether or not standards mode is enabled.
+         */
         public final boolean standardsMode;
 
-        /** Whether or not to throw an exception when a section resolves to a missing value. If
-          * false, the section is simply omitted (or included in the case of inverse sections). If
-          * true, a {@code MustacheException} is thrown. */
+        /**
+         * Whether or not to throw an exception when a section resolves to a missing value. If
+         * false, the section is simply omitted (or included in the case of inverse sections). If
+         * true, a {@code MustacheException} is thrown.
+         */
         public final boolean strictSections;
 
-        /** A value to use when a variable resolves to null. If this value is null (which is the
-          * default null value), an exception will be thrown. If {@link #missingIsNull} is also
-          * true, this value will be used when a variable cannot be resolved.
-          *
-          * <p>If the nullValue contains a substring {@code {{name}}}, then this substring will be
-          * replaced by name of the variable. For example, if nullValue is {@code ?{{name}}?} and
-          * the missing variable is {@code foo}, then string {@code ?foo?} will be used.</p> */
+        /**
+         * A value to use when a variable resolves to null. If this value is null (which is the
+         * default null value), an exception will be thrown. If {@link #missingIsNull} is also
+         * true, this value will be used when a variable cannot be resolved.
+         * <p>
+         * <p>If the nullValue contains a substring {@code {{name}}}, then this substring will be
+         * replaced by name of the variable. For example, if nullValue is {@code ?{{name}}?} and
+         * the missing variable is {@code foo}, then string {@code ?foo?} will be used.</p>
+         */
         public final String nullValue;
 
-        /** If this value is true, missing variables will be treated like variables that return
-          * null. {@link #nullValue} will be used in their place, assuming {@link #nullValue} is
-          * configured to a non-null value. */
+        /**
+         * If this value is true, missing variables will be treated like variables that return
+         * null. {@link #nullValue} will be used in their place, assuming {@link #nullValue} is
+         * configured to a non-null value.
+         */
         public final boolean missingIsNull;
 
-        /** If this value is true, empty string will be treated as a false value, as in JavaScript
-          * mustache implementation. Default is false. */
+        /**
+         * If this value is true, empty string will be treated as a false value, as in JavaScript
+         * mustache implementation. Default is false.
+         */
         public final boolean emptyStringIsFalse;
 
-        /** If this value is true, zero will be treated as a false value, as in JavaScript
-          * mustache implementation. Default is false. */
+        /**
+         * If this value is true, zero will be treated as a false value, as in JavaScript
+         * mustache implementation. Default is false.
+         */
         public final boolean zeroIsFalse;
 
-        /** Handles converting objects to strings when rendering a template. The default formatter
-          * uses {@link String#valueOf}. */
+        /**
+         * Handles converting objects to strings when rendering a template. The default formatter
+         * uses {@link String#valueOf}.
+         */
         public final Formatter formatter;
 
-        /** Handles escaping characters in substituted text. */
+        /**
+         * Handles escaping characters in substituted text.
+         */
         public final Escaper escaper;
 
-        /** The template loader in use during this compilation. */
+        /**
+         * The template loader in use during this compilation.
+         */
         public final TemplateLoader loader;
 
-        /** The collector used by templates compiled with this compiler. */
+        /**
+         * The collector used by templates compiled with this compiler.
+         */
         public final Collector collector;
 
-        /** The delimiters used by default in templates compiled with this compiler. */
+        /**
+         * The delimiters used by default in templates compiled with this compiler.
+         */
         public final Delims delims;
 
-        /** Compiles the supplied template into a repeatedly executable intermediate form. */
-        public Template compile (String template) {
+        /**
+         * Compiles the supplied template into a repeatedly executable intermediate form.
+         */
+        public Template compile(String template) {
             return compile(new StringReader(template));
         }
 
-        /** Compiles the supplied template into a repeatedly executable intermediate form. */
-        public Template compile (Reader source) {
+        /**
+         * Compiles the supplied template into a repeatedly executable intermediate form.
+         */
+        public Template compile(Reader source) {
             return Mustache.compile(source, this);
         }
 
-        /** Returns a compiler that either does or does not escape HTML by default. Note: this
-          * overrides any escaper set via {@link #withEscaper}. */
-        public Compiler escapeHTML (boolean escapeHTML) {
+        /**
+         * Returns a compiler that either does or does not escape HTML by default. Note: this
+         * overrides any escaper set via {@link #withEscaper}.
+         */
+        public Compiler escapeHTML(boolean escapeHTML) {
             return withEscaper(escapeHTML ? Escapers.HTML : Escapers.NONE);
         }
 
-        /** Returns a compiler that either does or does not use standards mode. Standards mode
-          * disables the non-standard JMustache extensions like looking up missing names in a parent
-          * context. */
-        public Compiler standardsMode (boolean standardsMode) {
+        /**
+         * Returns a compiler that either does or does not use standards mode. Standards mode
+         * disables the non-standard JMustache extensions like looking up missing names in a parent
+         * context.
+         */
+        public Compiler standardsMode(boolean standardsMode) {
             return new Compiler(standardsMode, this.strictSections, this.nullValue,
-                                this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
-                                this.formatter, this.escaper, this.loader, this.collector,
-                                this.delims);
+                    this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
+                    this.formatter, this.escaper, this.loader, this.collector,
+                    this.delims);
         }
 
-        /** Returns a compiler that throws an exception when a section references a missing value
-          * ({@code true}) or treats a missing value as {@code false} ({@code false}, the default).
-          */
-        public Compiler strictSections (boolean strictSections) {
+        /**
+         * Returns a compiler that throws an exception when a section references a missing value
+         * ({@code true}) or treats a missing value as {@code false} ({@code false}, the default).
+         */
+        public Compiler strictSections(boolean strictSections) {
             return new Compiler(this.standardsMode, strictSections, this.nullValue,
-                                this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
-                                this.formatter, this.escaper, this.loader, this.collector,
-                                this.delims);
+                    this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
+                    this.formatter, this.escaper, this.loader, this.collector,
+                    this.delims);
         }
 
-        /** Returns a compiler that will use the given value for any variable that is missing, or
-          * otherwise resolves to null. This is like {@link #nullValue} except that it returns the
-          * supplied default for missing keys and existing keys that return null values. */
-        public Compiler defaultValue (String defaultValue) {
+        /**
+         * Returns a compiler that will use the given value for any variable that is missing, or
+         * otherwise resolves to null. This is like {@link #nullValue} except that it returns the
+         * supplied default for missing keys and existing keys that return null values.
+         */
+        public Compiler defaultValue(String defaultValue) {
             return new Compiler(this.standardsMode, this.strictSections, defaultValue, true,
-                                this.emptyStringIsFalse, this.zeroIsFalse, this.formatter,
-                                this.escaper, this.loader, this.collector, this.delims);
+                    this.emptyStringIsFalse, this.zeroIsFalse, this.formatter,
+                    this.escaper, this.loader, this.collector, this.delims);
         }
 
-        /** Returns a compiler that will use the given value for any variable that resolves to
-          * null, but will still raise an exception for variables for which an accessor cannot be
-          * found. This is like {@link #defaultValue} except that it differentiates between missing
-          * accessors, and accessors that exist but return null.
-          * <ul>
-          * <li>In the case of a Java object being used as a context, if no field or method can be
-          * found for a variable, an exception will be raised.</li>
-          * <li>In the case of a {@link Map} being used as a context, if the map does not contain
-          * a mapping for a variable, an exception will be raised. If the map contains a mapping
-          * which maps to {@code null}, then {@code nullValue} is used.</li>
-          * </ul> */
-        public Compiler nullValue (String nullValue) {
+        /**
+         * Returns a compiler that will use the given value for any variable that resolves to
+         * null, but will still raise an exception for variables for which an accessor cannot be
+         * found. This is like {@link #defaultValue} except that it differentiates between missing
+         * accessors, and accessors that exist but return null.
+         * <ul>
+         * <li>In the case of a Java object being used as a context, if no field or method can be
+         * found for a variable, an exception will be raised.</li>
+         * <li>In the case of a {@link Map} being used as a context, if the map does not contain
+         * a mapping for a variable, an exception will be raised. If the map contains a mapping
+         * which maps to {@code null}, then {@code nullValue} is used.</li>
+         * </ul>
+         */
+        public Compiler nullValue(String nullValue) {
             return new Compiler(this.standardsMode, this.strictSections, nullValue, false,
-                                this.emptyStringIsFalse, this.zeroIsFalse, this.formatter,
-                                this.escaper, this.loader, this.collector, this.delims);
+                    this.emptyStringIsFalse, this.zeroIsFalse, this.formatter,
+                    this.escaper, this.loader, this.collector, this.delims);
         }
 
-        /** Returns a compiler that will treat empty string as a false value if parameter is true. */
-        public Compiler emptyStringIsFalse (boolean emptyStringIsFalse) {
+        /**
+         * Returns a compiler that will treat empty string as a false value if parameter is true.
+         */
+        public Compiler emptyStringIsFalse(boolean emptyStringIsFalse) {
             return new Compiler(this.standardsMode, this.strictSections, this.nullValue,
-                                this.missingIsNull, emptyStringIsFalse, this.zeroIsFalse,
-                                this.formatter, this.escaper, this.loader, this.collector,
-                                this.delims);
+                    this.missingIsNull, emptyStringIsFalse, this.zeroIsFalse,
+                    this.formatter, this.escaper, this.loader, this.collector,
+                    this.delims);
         }
 
-        /** Returns a compiler that will treat zero as a false value if parameter is true. */
-        public Compiler zeroIsFalse (boolean zeroIsFalse) {
+        /**
+         * Returns a compiler that will treat zero as a false value if parameter is true.
+         */
+        public Compiler zeroIsFalse(boolean zeroIsFalse) {
             return new Compiler(this.standardsMode, this.strictSections, this.nullValue,
-                                this.missingIsNull, this.emptyStringIsFalse, zeroIsFalse,
-                                this.formatter, this.escaper, this.loader, this.collector,
-                                this.delims);
+                    this.missingIsNull, this.emptyStringIsFalse, zeroIsFalse,
+                    this.formatter, this.escaper, this.loader, this.collector,
+                    this.delims);
         }
 
-        /** Configures the {@link Formatter} used to turn objects into strings. */
-        public Compiler withFormatter (Formatter formatter) {
+        /**
+         * Configures the {@link Formatter} used to turn objects into strings.
+         */
+        public Compiler withFormatter(Formatter formatter) {
             return new Compiler(this.standardsMode, this.strictSections, this.nullValue,
-                                this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
-                                formatter, this.escaper, this.loader, this.collector, this.delims);
+                    this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
+                    formatter, this.escaper, this.loader, this.collector, this.delims);
         }
 
-        /** Configures the {@link Escaper} used to escape substituted text. */
-        public Compiler withEscaper (Escaper escaper) {
+        /**
+         * Configures the {@link Escaper} used to escape substituted text.
+         */
+        public Compiler withEscaper(Escaper escaper) {
             return new Compiler(this.standardsMode, this.strictSections, this.nullValue,
-                                this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
-                                this.formatter, escaper, this.loader, this.collector, this.delims);
+                    this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
+                    this.formatter, escaper, this.loader, this.collector, this.delims);
         }
 
-        /** Returns a compiler configured to use the supplied template loader to handle partials. */
-        public Compiler withLoader (TemplateLoader loader) {
+        /**
+         * Returns a compiler configured to use the supplied template loader to handle partials.
+         */
+        public Compiler withLoader(TemplateLoader loader) {
             return new Compiler(this.standardsMode, this.strictSections, this.nullValue,
-                                this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
-                                this.formatter, this.escaper, loader, this.collector, this.delims);
+                    this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
+                    this.formatter, this.escaper, loader, this.collector, this.delims);
         }
 
-        /** Returns a compiler configured to use the supplied collector. */
-        public Compiler withCollector (Collector collector) {
+        /**
+         * Returns a compiler configured to use the supplied collector.
+         */
+        public Compiler withCollector(Collector collector) {
             return new Compiler(this.standardsMode, this.strictSections, this.nullValue,
-                                this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
-                                this.formatter, this.escaper, this.loader, collector, this.delims);
+                    this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
+                    this.formatter, this.escaper, this.loader, collector, this.delims);
         }
 
-        /** Returns a compiler configured to use the supplied delims as default delimiters.
-          * @param delims a string of the form {@code AB CD} or {@code A D} where A and B are
-          * opening delims and C and D are closing delims. */
-        public Compiler withDelims (String delims) {
+        /**
+         * Returns a compiler configured to use the supplied delims as default delimiters.
+         *
+         * @param delims a string of the form {@code AB CD} or {@code A D} where A and B are
+         *               opening delims and C and D are closing delims.
+         */
+        public Compiler withDelims(String delims) {
             return new Compiler(this.standardsMode, this.strictSections, this.nullValue,
-                                this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
-                                this.formatter, this.escaper, this.loader, this.collector,
-                                new Delims().updateDelims(delims));
+                    this.missingIsNull, this.emptyStringIsFalse, this.zeroIsFalse,
+                    this.formatter, this.escaper, this.loader, this.collector,
+                    new Delims().updateDelims(delims));
         }
 
-        /** Returns the value to use in the template for the null-valued property {@code name}. See
-          * {@link #nullValue} for more details. */
-        public String computeNullValue (String name) {
+        /**
+         * Returns the value to use in the template for the null-valued property {@code name}. See
+         * {@link #nullValue} for more details.
+         */
+        public String computeNullValue(String name) {
             return (nullValue == null) ? null : nullValue.replace("{{name}}", name);
         }
 
-        /** Returns true if the supplied value is "falsey". If {@link #emptyStringIsFalse} is true,
-          * then empty strings are considered falsey. If {@link #zeroIsFalse} is true, then zero
-          * values are considered falsey. */
-        public boolean isFalsey (Object value) {
+        /**
+         * Returns true if the supplied value is "falsey". If {@link #emptyStringIsFalse} is true,
+         * then empty strings are considered falsey. If {@link #zeroIsFalse} is true, then zero
+         * values are considered falsey.
+         */
+        public boolean isFalsey(Object value) {
             return (emptyStringIsFalse && "".equals(value)) ||
-            (zeroIsFalse && (value instanceof Number) && ((Number)value).longValue() == 0);
+                    (zeroIsFalse && (value instanceof Number) && ((Number) value).longValue() == 0);
         }
 
-        protected Compiler (boolean standardsMode, boolean strictSections, String nullValue,
-                            boolean missingIsNull, boolean emptyStringIsFalse, boolean zeroIsFalse,
-                            Formatter formatter, Escaper escaper, TemplateLoader loader,
-                            Collector collector, Delims delims) {
+        protected Compiler(boolean standardsMode, boolean strictSections, String nullValue,
+                           boolean missingIsNull, boolean emptyStringIsFalse, boolean zeroIsFalse,
+                           Formatter formatter, Escaper escaper, TemplateLoader loader,
+                           Collector collector, Delims delims) {
             this.standardsMode = standardsMode;
             this.strictSections = strictSections;
             this.nullValue = nullValue;
@@ -225,134 +279,160 @@ public class Mustache
         }
     }
 
-    /** Handles converting objects to strings when rendering templates. */
-    public interface Formatter
-    {
-        /** Converts {@code value} to a string for inclusion in a template. */
-        String format (Object value);
+    /**
+     * Handles converting objects to strings when rendering templates.
+     */
+    public interface Formatter {
+        /**
+         * Converts {@code value} to a string for inclusion in a template.
+         */
+        String format(Object value);
+        String format(Object value, String specifier);
     }
 
-    /** Handles lambdas. */
-    public interface Lambda
-    {
-        /** Executes this lambda on the supplied template fragment. The lambda should write its
-          * results to {@code out}.
-          *
-          * @param frag the fragment of the template that was passed to the lambda.
-          * @param out the writer to which the lambda should write its output.
-          */
-        void execute (Template.Fragment frag, Writer out) throws IOException;
+    /**
+     * Handles lambdas.
+     */
+    public interface Lambda {
+        /**
+         * Executes this lambda on the supplied template fragment. The lambda should write its
+         * results to {@code out}.
+         *
+         * @param frag the fragment of the template that was passed to the lambda.
+         * @param out  the writer to which the lambda should write its output.
+         */
+        void execute(Template.Fragment frag, Writer out) throws IOException;
     }
 
-    /** Handles lambdas that are also invoked for inverse sections.. */
-    public interface InvertibleLambda extends Lambda
-    {
-        /** Executes this lambda on the supplied template fragment, when the lambda is used in an
-          * inverse section. The lambda should write its results to {@code out}.
-          *
-          * @param frag the fragment of the template that was passed to the lambda.
-          * @param out the writer to which the lambda should write its output.
-          */
-        void executeInverse (Template.Fragment frag, Writer out) throws IOException;
+    /**
+     * Handles lambdas that are also invoked for inverse sections..
+     */
+    public interface InvertibleLambda extends Lambda {
+        /**
+         * Executes this lambda on the supplied template fragment, when the lambda is used in an
+         * inverse section. The lambda should write its results to {@code out}.
+         *
+         * @param frag the fragment of the template that was passed to the lambda.
+         * @param out  the writer to which the lambda should write its output.
+         */
+        void executeInverse(Template.Fragment frag, Writer out) throws IOException;
     }
 
-    /** Reads variables from context objects. */
-    public interface VariableFetcher
-    {
-        /** Reads the so-named variable from the supplied context object. */
-        Object get (Object ctx, String name) throws Exception;
+    /**
+     * Reads variables from context objects.
+     */
+    public interface VariableFetcher {
+        /**
+         * Reads the so-named variable from the supplied context object.
+         */
+        Object get(Object ctx, String name) throws Exception;
     }
 
-    /** Handles escaping characters in substituted text. */
-    public interface Escaper
-    {
-        /** Returns {@code raw} with the appropriate characters replaced with escape sequences. */
-        String escape (String raw);
+    /**
+     * Handles escaping characters in substituted text.
+     */
+    public interface Escaper {
+        /**
+         * Returns {@code raw} with the appropriate characters replaced with escape sequences.
+         */
+        String escape(String raw);
     }
 
-    /** Handles loading partial templates. */
-    public interface TemplateLoader
-    {
-        /** Returns a reader for the template with the supplied name.
-          * Reader will be closed by callee.
-          * @throws Exception if the template could not be loaded for any reason. */
-        Reader getTemplate (String name) throws Exception;
+    /**
+     * Handles loading partial templates.
+     */
+    public interface TemplateLoader {
+        /**
+         * Returns a reader for the template with the supplied name.
+         * Reader will be closed by callee.
+         *
+         * @throws Exception if the template could not be loaded for any reason.
+         */
+        Reader getTemplate(String name) throws Exception;
     }
 
-    /** Handles interpreting objects as collections. */
-    public interface Collector
-    {
-        /** Returns an iterator that can iterate over the supplied value, or null if the value is
-          * not a collection. */
-        Iterator<?> toIterator (final Object value);
+    /**
+     * Handles interpreting objects as collections.
+     */
+    public interface Collector {
+        /**
+         * Returns an iterator that can iterate over the supplied value, or null if the value is
+         * not a collection.
+         */
+        Iterator<?> toIterator(final Object value);
 
-        /** Creates a fetcher for a so-named variable in the supplied context object, which will
-          * never be null. The fetcher will be cached and reused for future contexts for which
-          * {@code octx.getClass().equals(nctx.getClass()}. */
-        VariableFetcher createFetcher (Object ctx, String name);
+        /**
+         * Creates a fetcher for a so-named variable in the supplied context object, which will
+         * never be null. The fetcher will be cached and reused for future contexts for which
+         * {@code octx.getClass().equals(nctx.getClass()}.
+         */
+        VariableFetcher createFetcher(Object ctx, String name);
 
-        /** Creates a map to be used to cache {@link VariableFetcher} instances. The GWT-compatible
-          * collector returns a HashMap here, but the reflection based fetcher (which only works on
-          * the JVM and Android, returns a concurrent hashmap. */
-        <K,V> Map<K,V> createFetcherCache ();
+        /**
+         * Creates a map to be used to cache {@link VariableFetcher} instances. The GWT-compatible
+         * collector returns a HashMap here, but the reflection based fetcher (which only works on
+         * the JVM and Android, returns a concurrent hashmap.
+         */
+        <K, V> Map<K, V> createFetcherCache();
     }
 
     /**
      * Returns a compiler that escapes HTML by default and does not use standards mode.
      */
-    public static Compiler compiler () {
+    public static Compiler compiler() {
         return new Compiler(/*standardsMode=*/false, /*strictSections=*/false, /*nullValue=*/null,
                             /*missingIsNull=*/false, /*emptyStringIsFalse=*/false,
                             /*zeroIsFalse=*/false, DEFAULT_FORMATTER, Escapers.HTML, FAILING_LOADER,
-                            new DefaultCollector(), new Delims());
+                new DefaultCollector(), new Delims());
     }
 
     /**
      * Compiles the supplied template into a repeatedly executable intermediate form.
      */
-    protected static Template compile (Reader source, Compiler compiler) {
+    protected static Template compile(Reader source, Compiler compiler) {
         Accumulator accum = new Parser(compiler).parse(source);
         return new Template(trim(accum.finish(), true), compiler);
     }
 
-    private Mustache () {} // no instantiateski
+    private Mustache() {
+    } // no instantiateski
 
-    protected static Template.Segment[] trim (Template.Segment[] segs, boolean top) {
+    protected static Template.Segment[] trim(Template.Segment[] segs, boolean top) {
         // now that we have all of our segments, we make a pass through them to trim whitespace
         // from section tags which stand alone on their lines
         for (int ii = 0, ll = segs.length; ii < ll; ii++) {
             Template.Segment seg = segs[ii];
-            Template.Segment pseg = (ii > 0   ) ? segs[ii-1] : null;
-            Template.Segment nseg = (ii < ll-1) ? segs[ii+1] : null;
-            StringSegment prev = (pseg instanceof StringSegment) ? (StringSegment)pseg : null;
-            StringSegment next = (nseg instanceof StringSegment) ? (StringSegment)nseg : null;
+            Template.Segment pseg = (ii > 0) ? segs[ii - 1] : null;
+            Template.Segment nseg = (ii < ll - 1) ? segs[ii + 1] : null;
+            StringSegment prev = (pseg instanceof StringSegment) ? (StringSegment) pseg : null;
+            StringSegment next = (nseg instanceof StringSegment) ? (StringSegment) nseg : null;
             // if we're at the top-level there are virtual "blank lines" before & after segs
             boolean prevBlank = ((pseg == null && top) || (prev != null && prev.trailsBlank()));
             boolean nextBlank = ((nseg == null && top) || (next != null && next.leadsBlank()));
             // potentially trim around the open and close tags of a block segment
             if (seg instanceof BlockSegment) {
-                BlockSegment block = (BlockSegment)seg;
+                BlockSegment block = (BlockSegment) seg;
                 if (prevBlank && block.firstLeadsBlank()) {
-                    if (pseg != null) segs[ii-1] = prev.trimTrailBlank();
+                    if (pseg != null) segs[ii - 1] = prev.trimTrailBlank();
                     block.trimFirstBlank();
                 }
                 if (nextBlank && block.lastTrailsBlank()) {
                     block.trimLastBlank();
-                    if (nseg != null) segs[ii+1] = next.trimLeadBlank();
+                    if (nseg != null) segs[ii + 1] = next.trimLeadBlank();
                 }
             }
             // potentially trim around non-printing (comments/delims) segments
             else if (seg instanceof FauxSegment) {
                 if (prevBlank && nextBlank) {
-                    if (pseg != null) segs[ii-1] = prev.trimTrailBlank();
-                    if (nseg != null) segs[ii+1] = next.trimLeadBlank();
+                    if (pseg != null) segs[ii - 1] = prev.trimTrailBlank();
+                    if (nseg != null) segs[ii + 1] = next.trimLeadBlank();
                 }
             }
         }
         return segs;
     }
 
-    protected static void restoreStartTag (StringBuilder text, Delims starts) {
+    protected static void restoreStartTag(StringBuilder text, Delims starts) {
         text.insert(0, starts.start1);
         if (starts.start2 != NO_CHAR) {
             text.insert(1, starts.start2);
@@ -360,7 +440,7 @@ public class Mustache
     }
 
     // TODO: this method was never called, what was my intention here?
-    protected static boolean allowsWhitespace (char typeChar) {
+    protected static boolean allowsWhitespace(char typeChar) {
         return (typeChar == '=' /* change delimiters */) || (typeChar == '!' /* comment */);
     }
 
@@ -381,17 +461,17 @@ public class Mustache
         int line = 1, column = 0;
         int tagStartColumn = -1;
 
-        public Parser (Compiler compiler) {
+        public Parser(Compiler compiler) {
             this.accum = new Accumulator(compiler, true);
             this.delims = compiler.delims.copy();
         }
 
-        public Accumulator parse (Reader source) {
+        public Accumulator parse(Reader source) {
             this.source = source;
 
             int v;
             while ((v = nextChar()) != -1) {
-                char c = (char)v;
+                char c = (char) v;
                 ++column; // our columns start at one, so increment before parse
                 parseChar(c);
                 // if we just parsed a newline, reset the column to zero and advance line
@@ -403,112 +483,112 @@ public class Mustache
 
             // accumulate any trailing text
             switch (state) {
-            case TAG:
-                restoreStartTag(text, delims);
-                break;
-            case MATCHING_END:
-                restoreStartTag(text, delims);
-                text.append(delims.end1);
-                break;
-            case MATCHING_START:
-                text.append(delims.start1);
-                break;
-            case TEXT: // do nothing
-                break;
+                case TAG:
+                    restoreStartTag(text, delims);
+                    break;
+                case MATCHING_END:
+                    restoreStartTag(text, delims);
+                    text.append(delims.end1);
+                    break;
+                case MATCHING_START:
+                    text.append(delims.start1);
+                    break;
+                case TEXT: // do nothing
+                    break;
             }
             accum.addTextSegment(text);
 
             return accum;
         }
 
-        protected void parseChar (char c) {
+        protected void parseChar(char c) {
             switch (state) {
-            case TEXT:
-                if (c == delims.start1) {
-                    state = MATCHING_START;
-                    tagStartColumn = column;
-                    if (delims.start2 == NO_CHAR) {
-                        parseChar(NO_CHAR);
+                case TEXT:
+                    if (c == delims.start1) {
+                        state = MATCHING_START;
+                        tagStartColumn = column;
+                        if (delims.start2 == NO_CHAR) {
+                            parseChar(NO_CHAR);
+                        }
+                    } else {
+                        text.append(c);
                     }
-                } else {
-                    text.append(c);
-                }
-                break;
+                    break;
 
-            case MATCHING_START:
-                if (c == delims.start2) {
-                    accum.addTextSegment(text);
-                    state = TAG;
-                } else {
-                    text.append(delims.start1);
-                    state = TEXT;
-                    parseChar(c);
-                }
-                break;
-
-            case TAG:
-                if (c == delims.end1) {
-                    state = MATCHING_END;
-                    if (delims.end2 == NO_CHAR) {
-                        parseChar(NO_CHAR);
-                    }
-
-                } else if (c == delims.start1 && text.length() > 0 && text.charAt(0) != '!') {
-                    // if we've already matched some tag characters and we see a new start tag
-                    // character (e.g. "{{foo {" but not "{{{"), treat the already matched text as
-                    // plain text and start matching a new tag from this point, unless we're in
-                    // a comment tag.
-                    restoreStartTag(text, delims);
-                    accum.addTextSegment(text);
-                    tagStartColumn = column;
-                    if (delims.start2 == NO_CHAR) {
+                case MATCHING_START:
+                    if (c == delims.start2) {
                         accum.addTextSegment(text);
                         state = TAG;
                     } else {
-                        state = MATCHING_START;
+                        text.append(delims.start1);
+                        state = TEXT;
+                        parseChar(c);
                     }
+                    break;
 
-                } else {
-                    text.append(c);
-                }
-                break;
-
-            case MATCHING_END:
-                if (c == delims.end2) {
-                    if (text.charAt(0) == '=') {
-                        delims.updateDelims(text.substring(1, text.length()-1));
-                        text.setLength(0);
-                        accum.addFauxSegment(); // for newline trimming
-                    } else {
-                        // if the delimiters are {{ and }}, and the tag starts with {{{ then
-                        // require that it end with }}} and disable escaping
-                        if (delims.isStaches() && text.charAt(0) == delims.start1) {
-                            // we've only parsed }} at this point, so we have to slurp in another
-                            // character from the input stream and check it
-                            int end3 = nextChar();
-                            if (end3 != '}') {
-                                String got = (end3 == -1) ? "" : String.valueOf((char)end3);
-                                throw new MustacheParseException(
-                                    "Invalid triple-mustache tag: {{" + text + "}}" + got, line);
-                            }
-                            // convert it into (equivalent) {{&text}} which addTagSegment handles
-                            text.replace(0, 1, "&");
+                case TAG:
+                    if (c == delims.end1) {
+                        state = MATCHING_END;
+                        if (delims.end2 == NO_CHAR) {
+                            parseChar(NO_CHAR);
                         }
-                        // process the tag between the mustaches
-                        accum = accum.addTagSegment(text, line);
-                    }
-                    state = TEXT;
 
-                } else {
-                    text.append(delims.end1);
-                    state = TAG;
-                    parseChar(c);
-                }
-                break;
+                    } else if (c == delims.start1 && text.length() > 0 && text.charAt(0) != '!') {
+                        // if we've already matched some tag characters and we see a new start tag
+                        // character (e.g. "{{foo {" but not "{{{"), treat the already matched text as
+                        // plain text and start matching a new tag from this point, unless we're in
+                        // a comment tag.
+                        restoreStartTag(text, delims);
+                        accum.addTextSegment(text);
+                        tagStartColumn = column;
+                        if (delims.start2 == NO_CHAR) {
+                            accum.addTextSegment(text);
+                            state = TAG;
+                        } else {
+                            state = MATCHING_START;
+                        }
+
+                    } else {
+                        text.append(c);
+                    }
+                    break;
+
+                case MATCHING_END:
+                    if (c == delims.end2) {
+                        if (text.charAt(0) == '=') {
+                            delims.updateDelims(text.substring(1, text.length() - 1));
+                            text.setLength(0);
+                            accum.addFauxSegment(); // for newline trimming
+                        } else {
+                            // if the delimiters are {{ and }}, and the tag starts with {{{ then
+                            // require that it end with }}} and disable escaping
+                            if (delims.isStaches() && text.charAt(0) == delims.start1) {
+                                // we've only parsed }} at this point, so we have to slurp in another
+                                // character from the input stream and check it
+                                int end3 = nextChar();
+                                if (end3 != '}') {
+                                    String got = (end3 == -1) ? "" : String.valueOf((char) end3);
+                                    throw new MustacheParseException(
+                                            "Invalid triple-mustache tag: {{" + text + "}}" + got, line);
+                                }
+                                // convert it into (equivalent) {{&text}} which addTagSegment handles
+                                text.replace(0, 1, "&");
+                            }
+                            // process the tag between the mustaches
+                            accum = accum.addTagSegment(text, line);
+                        }
+                        state = TEXT;
+
+                    } else {
+                        text.append(delims.end1);
+                        state = TAG;
+                        parseChar(c);
+                    }
+                    break;
             }
         }
 
-        protected int nextChar () {
+        protected int nextChar() {
             try {
                 return source.read();
             } catch (IOException ioe) {
@@ -521,43 +601,43 @@ public class Mustache
         public char start1 = '{', end1 = '}';
         public char start2 = '{', end2 = '}';
 
-        public boolean isStaches () {
+        public boolean isStaches() {
             return start1 == '{' && start2 == '{' && end1 == '}' && end2 == '}';
         }
 
-        public Delims updateDelims (String dtext) {
+        public Delims updateDelims(String dtext) {
             String[] delims = dtext.split(" ");
             if (delims.length != 2) throw new MustacheException(errmsg(dtext));
 
             switch (delims[0].length()) {
-            case 1:
-                start1 = delims[0].charAt(0);
-                start2 = NO_CHAR;
-                break;
-            case 2:
-                start1 = delims[0].charAt(0);
-                start2 = delims[0].charAt(1);
-                break;
-            default:
-                throw new MustacheException(errmsg(dtext));
+                case 1:
+                    start1 = delims[0].charAt(0);
+                    start2 = NO_CHAR;
+                    break;
+                case 2:
+                    start1 = delims[0].charAt(0);
+                    start2 = delims[0].charAt(1);
+                    break;
+                default:
+                    throw new MustacheException(errmsg(dtext));
             }
 
             switch (delims[1].length()) {
-            case 1:
-                end1 = delims[1].charAt(0);
-                end2 = NO_CHAR;
-                break;
-            case 2:
-                end1 = delims[1].charAt(0);
-                end2 = delims[1].charAt(1);
-                break;
-            default:
-                throw new MustacheException(errmsg(dtext));
+                case 1:
+                    end1 = delims[1].charAt(0);
+                    end2 = NO_CHAR;
+                    break;
+                case 2:
+                    end1 = delims[1].charAt(0);
+                    end2 = delims[1].charAt(1);
+                    break;
+                default:
+                    throw new MustacheException(errmsg(dtext));
             }
             return this;
         }
 
-        Delims copy () {
+        Delims copy() {
             Delims d = new Delims();
             d.start1 = start1;
             d.start2 = start2;
@@ -566,110 +646,115 @@ public class Mustache
             return d;
         }
 
-        private static String errmsg (String dtext) {
+        private static String errmsg(String dtext) {
             return "Invalid delimiter configuration '" + dtext + "'. Must be of the " +
-                "form {{=1 2=}} or {{=12 34=}} where 1, 2, 3 and 4 are delimiter chars.";
+                    "form {{=1 2=}} or {{=12 34=}} where 1, 2, 3 and 4 are delimiter chars.";
         }
     }
 
     protected static class Accumulator {
-        public Accumulator (Compiler compiler, boolean topLevel) {
+        public Accumulator(Compiler compiler, boolean topLevel) {
             _comp = compiler;
             _topLevel = topLevel;
         }
 
-        public void addTextSegment (StringBuilder text) {
+        public void addTextSegment(StringBuilder text) {
             if (text.length() > 0) {
                 _segs.add(new StringSegment(text.toString(), _segs.isEmpty() && _topLevel));
                 text.setLength(0);
             }
         }
 
-        public Accumulator addTagSegment (final StringBuilder accum, final int tagLine) {
+        public Accumulator addTagSegment(final StringBuilder accum, final int tagLine) {
             final Accumulator outer = this;
             String tag = accum.toString().trim();
             final String tag1 = tag.substring(1).trim();
             accum.setLength(0);
 
             switch (tag.charAt(0)) {
-            case '#':
-                requireNoNewlines(tag, tagLine);
-                return new Accumulator(_comp, false) {
-                    @Override public Template.Segment[] finish () {
-                        throw new MustacheParseException(
-                            "Section missing close tag '" + tag1 + "'", tagLine);
-                    }
-                    @Override protected Accumulator addCloseSectionSegment (String itag, int line) {
-                        requireSameName(tag1, itag, line);
-                        outer._segs.add(new SectionSegment(_comp, itag, super.finish(), tagLine));
-                        return outer;
-                    }
-                };
+                case '#':
+                    requireNoNewlines(tag, tagLine);
+                    return new Accumulator(_comp, false) {
+                        @Override
+                        public Template.Segment[] finish() {
+                            throw new MustacheParseException(
+                                    "Section missing close tag '" + tag1 + "'", tagLine);
+                        }
 
-            case '>':
-                _segs.add(new IncludedTemplateSegment(_comp, tag1));
-                return this;
+                        @Override
+                        protected Accumulator addCloseSectionSegment(String itag, int line) {
+                            requireSameName(tag1, itag, line);
+                            outer._segs.add(new SectionSegment(_comp, itag, super.finish(), tagLine));
+                            return outer;
+                        }
+                    };
 
-            case '^':
-                requireNoNewlines(tag, tagLine);
-                return new Accumulator(_comp, false) {
-                    @Override public Template.Segment[] finish () {
-                        throw new MustacheParseException(
-                            "Inverted section missing close tag '" + tag1 + "'", tagLine);
-                    }
-                    @Override protected Accumulator addCloseSectionSegment (String itag, int line) {
-                        requireSameName(tag1, itag, line);
-                        outer._segs.add(new InvertedSegment(_comp, itag, super.finish(), tagLine));
-                        return outer;
-                    }
-                };
+                case '>':
+                    _segs.add(new IncludedTemplateSegment(_comp, tag1));
+                    return this;
 
-            case '/':
-                requireNoNewlines(tag, tagLine);
-                return addCloseSectionSegment(tag1, tagLine);
+                case '^':
+                    requireNoNewlines(tag, tagLine);
+                    return new Accumulator(_comp, false) {
+                        @Override
+                        public Template.Segment[] finish() {
+                            throw new MustacheParseException(
+                                    "Inverted section missing close tag '" + tag1 + "'", tagLine);
+                        }
 
-            case '!':
-                // comment!, ignore
-                _segs.add(new FauxSegment()); // for whitespace trimming
-                return this;
+                        @Override
+                        protected Accumulator addCloseSectionSegment(String itag, int line) {
+                            requireSameName(tag1, itag, line);
+                            outer._segs.add(new InvertedSegment(_comp, itag, super.finish(), tagLine));
+                            return outer;
+                        }
+                    };
 
-            case '&':
-                requireNoNewlines(tag, tagLine);
-                _segs.add(new VariableSegment(tag1, tagLine, _comp.formatter, Escapers.NONE));
-                return this;
+                case '/':
+                    requireNoNewlines(tag, tagLine);
+                    return addCloseSectionSegment(tag1, tagLine);
 
-            default:
-                requireNoNewlines(tag, tagLine);
-                _segs.add(new VariableSegment(tag, tagLine, _comp.formatter, _comp.escaper));
-                return this;
+                case '!':
+                    // comment!, ignore
+                    _segs.add(new FauxSegment()); // for whitespace trimming
+                    return this;
+
+                case '&':
+                    requireNoNewlines(tag, tagLine);
+                    _segs.add(new VariableSegment(tag1, tagLine, _comp.formatter, Escapers.NONE));
+                    return this;
+
+                default:
+                    requireNoNewlines(tag, tagLine);
+                    _segs.add(new VariableSegment(tag, tagLine, _comp.formatter, _comp.escaper));
+                    return this;
             }
         }
 
-        public void addFauxSegment () {
+        public void addFauxSegment() {
             _segs.add(new FauxSegment());
         }
 
-        public Template.Segment[] finish () {
+        public Template.Segment[] finish() {
             return _segs.toArray(new Template.Segment[_segs.size()]);
         }
 
-        protected Accumulator addCloseSectionSegment (String tag, int line) {
+        protected Accumulator addCloseSectionSegment(String tag, int line) {
             throw new MustacheParseException(
-                "Section close tag with no open tag '" + tag + "'", line);
+                    "Section close tag with no open tag '" + tag + "'", line);
         }
 
-        protected static void requireNoNewlines (String tag, int line) {
+        protected static void requireNoNewlines(String tag, int line) {
             if (tag.indexOf('\n') != -1 || tag.indexOf('\r') != -1) {
                 throw new MustacheParseException(
-                    "Invalid tag name: contains newline '" + tag + "'", line);
+                        "Invalid tag name: contains newline '" + tag + "'", line);
             }
         }
 
-        protected static void requireSameName (String name1, String name2, int line)
-        {
+        protected static void requireSameName(String name1, String name2, int line) {
             if (!name1.equals(name2)) {
                 throw new MustacheParseException("Section close tag with mismatched open tag '" +
-                                                 name2 + "' != '" + name1 + "'", line);
+                        name2 + "' != '" + name1 + "'", line);
             }
         }
 
@@ -678,13 +763,15 @@ public class Mustache
         protected final List<Template.Segment> _segs = new ArrayList<Template.Segment>();
     }
 
-    /** A simple segment that reproduces a string. */
+    /**
+     * A simple segment that reproduces a string.
+     */
     protected static class StringSegment extends Template.Segment {
-        public StringSegment (String text, boolean first) {
+        public StringSegment(String text, boolean first) {
             this(text, blankPos(text, true, first), blankPos(text, false, first));
         }
 
-        public StringSegment (String text, int leadBlank, int trailBlank) {
+        public StringSegment(String text, int leadBlank, int trailBlank) {
             assert leadBlank >= -1;
             assert trailBlank >= -1;
             _text = text;
@@ -692,33 +779,42 @@ public class Mustache
             _trailBlank = trailBlank;
         }
 
-        public boolean leadsBlank () { return _leadBlank != -1; }
-        public boolean trailsBlank () { return _trailBlank != -1; }
+        public boolean leadsBlank() {
+            return _leadBlank != -1;
+        }
 
-        public StringSegment trimLeadBlank () {
+        public boolean trailsBlank() {
+            return _trailBlank != -1;
+        }
+
+        public StringSegment trimLeadBlank() {
             if (_leadBlank == -1) return this;
-            int lpos = _leadBlank+1, newTrail = _trailBlank == -1 ? -1 : _trailBlank-lpos;
+            int lpos = _leadBlank + 1, newTrail = _trailBlank == -1 ? -1 : _trailBlank - lpos;
             return new StringSegment(_text.substring(lpos), -1, newTrail);
         }
-        public StringSegment trimTrailBlank  () {
+
+        public StringSegment trimTrailBlank() {
             return _trailBlank == -1 ? this : new StringSegment(
-                _text.substring(0, _trailBlank), _leadBlank, -1);
+                    _text.substring(0, _trailBlank), _leadBlank, -1);
         }
 
-        @Override public void execute (Template tmpl, Template.Context ctx, Writer out) {
+        @Override
+        public void execute(Template tmpl, Template.Context ctx, Writer out) {
             write(out, _text);
         }
-        @Override public String toString () {
+
+        @Override
+        public String toString() {
             return "Text(" + _text.replace("\r", "\\r").replace("\n", "\\n") + ")" +
-                _leadBlank + "/" + _trailBlank;
+                    _leadBlank + "/" + _trailBlank;
         }
 
-        private static int blankPos (String text, boolean leading, boolean first) {
+        private static int blankPos(String text, boolean leading, boolean first) {
             int len = text.length();
-            for (int ii = leading ? 0 : len-1, ll = leading ? len : -1, dd = leading ? 1 : -1;
+            for (int ii = leading ? 0 : len - 1, ll = leading ? len : -1, dd = leading ? 1 : -1;
                  ii != ll; ii += dd) {
                 char c = text.charAt(ii);
-                if (c == '\n') return leading ? ii : ii+1;
+                if (c == '\n') return leading ? ii : ii + 1;
                 if (!Character.isWhitespace(c)) return -1;
             }
             // if this is the first string segment and we're looking for trailing whitespace, a
@@ -731,11 +827,13 @@ public class Mustache
     }
 
     protected static class IncludedTemplateSegment extends Template.Segment {
-        public IncludedTemplateSegment (Compiler compiler, String name) {
+        public IncludedTemplateSegment(Compiler compiler, String name) {
             _comp = compiler;
             _name = name;
         }
-        @Override public void execute (Template tmpl, Template.Context ctx, Writer out) {
+
+        @Override
+        public void execute(Template tmpl, Template.Context ctx, Writer out) {
             // we compile our template lazily to avoid infinie recursion if a template includes
             // itself (see issue #13)
             if (_template == null) {
@@ -745,7 +843,7 @@ public class Mustache
                     _template = _comp.compile(tin);
                 } catch (Exception e) {
                     if (e instanceof RuntimeException) {
-                        throw (RuntimeException)e;
+                        throw (RuntimeException) e;
                     } else {
                         throw new MustacheException("Unable to load template: " + _name, e);
                     }
@@ -761,68 +859,95 @@ public class Mustache
             // would happen if we just called execute() with ctx.data
             _template.executeSegs(ctx, out);
         }
+
         protected final Compiler _comp;
         protected final String _name;
         protected Template _template;
     }
 
-    /** A helper class for named segments. */
+    /**
+     * A helper class for named segments.
+     */
     protected static abstract class NamedSegment extends Template.Segment {
-        protected NamedSegment (String name, int line) {
+        protected NamedSegment(String name, int line) {
             _name = name.intern();
             _line = line;
         }
+
         protected final String _name;
         protected final int _line;
     }
 
-    /** A segment that substitutes the contents of a variable. */
+    /**
+     * A segment that substitutes the contents of a variable.
+     */
     protected static class VariableSegment extends NamedSegment {
-        public VariableSegment (String name, int line, Formatter formatter, Escaper escaper) {
-            super(name, line);
+
+
+        public VariableSegment(String name, int line, Formatter formatter, Escaper escaper) {
+            super(name.indexOf('|') < 0 ? name : name.substring(0, name.indexOf('|')).trim(), line);
             _formatter = formatter;
             _escaper = escaper;
+            if (name.indexOf('|') > 0) {
+                _formatSpecifier = name.substring(name.indexOf('|') + 1).trim();
+            }
         }
-        @Override public void execute (Template tmpl, Template.Context ctx, Writer out)  {
+
+        @Override
+        public void execute(Template tmpl, Template.Context ctx, Writer out) {
             Object value = tmpl.getValueOrDefault(ctx, _name, _line);
             if (value == null) {
                 throw new MustacheException.Context("No key, method or field with name '" + _name +
-                                                    "' on line " + _line, _name, _line);
+                        "' on line " + _line, _name, _line);
             }
-            write(out, _escaper.escape(_formatter.format(value)));
+            if (_formatSpecifier != null) {
+                write(out, _escaper.escape(_formatter.format(value, _formatSpecifier)));
+
+            } else {
+                write(out, _escaper.escape(_formatter.format(value)));
+            }
         }
-        @Override public String toString () {
+
+        @Override
+        public String toString() {
             return "Var(" + _name + ":" + _line + ")";
         }
+
         protected final Formatter _formatter;
         protected final Escaper _escaper;
+        protected String _formatSpecifier;
     }
 
-    /** A helper class for block segments. */
+    /**
+     * A helper class for block segments.
+     */
     protected static abstract class BlockSegment extends NamedSegment {
-        public boolean firstLeadsBlank () {
+        public boolean firstLeadsBlank() {
             if (_segs.length == 0 || !(_segs[0] instanceof StringSegment)) return false;
-            return ((StringSegment)_segs[0]).leadsBlank();
-        }
-        public void trimFirstBlank () {
-            _segs[0] = ((StringSegment)_segs[0]).trimLeadBlank();
+            return ((StringSegment) _segs[0]).leadsBlank();
         }
 
-        public boolean lastTrailsBlank () {
-            int lastIdx = _segs.length-1;
+        public void trimFirstBlank() {
+            _segs[0] = ((StringSegment) _segs[0]).trimLeadBlank();
+        }
+
+        public boolean lastTrailsBlank() {
+            int lastIdx = _segs.length - 1;
             if (_segs.length == 0 || !(_segs[lastIdx] instanceof StringSegment)) return false;
-            return ((StringSegment)_segs[lastIdx]).trailsBlank();
-        }
-        public void trimLastBlank () {
-            int idx = _segs.length-1;
-            _segs[idx] = ((StringSegment)_segs[idx]).trimTrailBlank();
+            return ((StringSegment) _segs[lastIdx]).trailsBlank();
         }
 
-        protected BlockSegment (String name, Template.Segment[] segs, int line) {
+        public void trimLastBlank() {
+            int idx = _segs.length - 1;
+            _segs[idx] = ((StringSegment) _segs[idx]).trimTrailBlank();
+        }
+
+        protected BlockSegment(String name, Template.Segment[] segs, int line) {
             super(name, line);
             _segs = trim(segs, false);
         }
-        protected void executeSegs (Template tmpl, Template.Context ctx, Writer out)  {
+
+        protected void executeSegs(Template tmpl, Template.Context ctx, Writer out) {
             for (Template.Segment seg : _segs) {
                 seg.execute(tmpl, ctx, out);
             }
@@ -831,13 +956,17 @@ public class Mustache
         protected final Template.Segment[] _segs;
     }
 
-    /** A segment that represents a section. */
+    /**
+     * A segment that represents a section.
+     */
     protected static class SectionSegment extends BlockSegment {
-        public SectionSegment (Compiler compiler, String name, Template.Segment[] segs, int line) {
+        public SectionSegment(Compiler compiler, String name, Template.Segment[] segs, int line) {
             super(name, segs, line);
             _comp = compiler;
         }
-        @Override public void execute (Template tmpl, Template.Context ctx, Writer out)  {
+
+        @Override
+        public void execute(Template tmpl, Template.Context ctx, Writer out) {
             Object value = tmpl.getSectionValue(ctx, _name, _line); // won't return null
             Iterator<?> iter = _comp.collector.toIterator(value);
             if (iter != null) {
@@ -848,12 +977,12 @@ public class Mustache
                     executeSegs(tmpl, ctx.nest(elem, ++index, onFirst, onLast), out);
                 }
             } else if (value instanceof Boolean) {
-                if ((Boolean)value) {
+                if ((Boolean) value) {
                     executeSegs(tmpl, ctx, out);
                 }
             } else if (value instanceof Lambda) {
                 try {
-                    ((Lambda)value).execute(tmpl.createFragment(_segs, ctx), out);
+                    ((Lambda) value).execute(tmpl.createFragment(_segs, ctx), out);
                 } catch (IOException ioe) {
                     throw new MustacheException(ioe);
                 }
@@ -863,19 +992,26 @@ public class Mustache
                 executeSegs(tmpl, ctx.nest(value, 0, false, false), out);
             }
         }
-        @Override public String toString () {
+
+        @Override
+        public String toString() {
             return "Section(" + _name + ":" + _line + "): " + Arrays.toString(_segs);
         }
+
         protected final Compiler _comp;
     }
 
-    /** A segment that represents an inverted section. */
+    /**
+     * A segment that represents an inverted section.
+     */
     protected static class InvertedSegment extends BlockSegment {
-        public InvertedSegment (Compiler compiler, String name, Template.Segment[] segs, int line) {
+        public InvertedSegment(Compiler compiler, String name, Template.Segment[] segs, int line) {
             super(name, segs, line);
             _comp = compiler;
         }
-        @Override public void execute (Template tmpl, Template.Context ctx, Writer out)  {
+
+        @Override
+        public void execute(Template tmpl, Template.Context ctx, Writer out) {
             Object value = tmpl.getSectionValue(ctx, _name, _line); // won't return null
             Iterator<?> iter = _comp.collector.toIterator(value);
             if (iter != null) {
@@ -883,12 +1019,12 @@ public class Mustache
                     executeSegs(tmpl, ctx, out);
                 }
             } else if (value instanceof Boolean) {
-                if (!(Boolean)value) {
+                if (!(Boolean) value) {
                     executeSegs(tmpl, ctx, out);
                 }
             } else if (value instanceof InvertibleLambda) {
                 try {
-                    ((InvertibleLambda)value).executeInverse(tmpl.createFragment(_segs, ctx), out);
+                    ((InvertibleLambda) value).executeInverse(tmpl.createFragment(_segs, ctx), out);
                 } catch (IOException ioe) {
                     throw new MustacheException(ioe);
                 }
@@ -896,28 +1032,42 @@ public class Mustache
                 executeSegs(tmpl, ctx, out);
             } // TODO: fail?
         }
-        @Override public String toString () {
+
+        @Override
+        public String toString() {
             return "Inverted(" + _name + ":" + _line + "): " + Arrays.toString(_segs);
         }
+
         protected final Compiler _comp;
     }
 
     protected static class FauxSegment extends Template.Segment {
-        @Override public void execute (Template tmpl, Template.Context ctx, Writer out) {} // nada
-        @Override public String toString () { return "Faux"; }
+        @Override
+        public void execute(Template tmpl, Template.Context ctx, Writer out) {
+        } // nada
+
+        @Override
+        public String toString() {
+            return "Faux";
+        }
     }
 
-    /** Used when we have only a single character delimiter. */
+    /**
+     * Used when we have only a single character delimiter.
+     */
     protected static final char NO_CHAR = Character.MIN_VALUE;
 
     protected static final TemplateLoader FAILING_LOADER = new TemplateLoader() {
-        public Reader getTemplate (String name) {
+        public Reader getTemplate(String name) {
             throw new UnsupportedOperationException("Template loading not configured");
         }
     };
 
     protected static final Formatter DEFAULT_FORMATTER = new Formatter() {
-        public String format (Object value) {
+        public String format(Object value) {
+            return String.valueOf(value);
+        }
+        public String format(Object value, String specifier) {
             return String.valueOf(value);
         }
     };
