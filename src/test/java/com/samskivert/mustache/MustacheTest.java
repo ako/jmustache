@@ -260,4 +260,37 @@ public class MustacheTest extends SharedTests
             Date today = new Date(1389208567874L);
         }));
     }
+
+    @Test public void testCustomWaxFormatterWithFirst () {
+        Mustache.Formatter fmt = new Mustache.Formatter() {
+            public String format (Object value) {
+                if (value instanceof Date) return _fmt.format((Date)value);
+                else return String.valueOf(value);
+            }
+            public String format (Object value, String specifier) {
+                if (value instanceof Date) {
+                    SimpleDateFormat fmt = new SimpleDateFormat(specifier);
+                    return fmt.format((Date)value);
+                }
+                else return String.valueOf(value);
+            }
+            protected SimpleDateFormat _fmt = new SimpleDateFormat("yyyy/MM/dd"); {
+                _fmt.setTimeZone(TimeZone.getTimeZone("UTC"));
+            }
+        };
+        check("Date: 2014-01.08, mon", Mustache.compiler().withFormatter(fmt).
+                compile("Date: {{today | yyyy-MM.dd}}, {{#weekdays}}{{#-first}}{{weekday}}{{/-first}}{{/weekdays}}").execute(new Object() {
+            String msg = "Date";
+            Date today = new Date(1389208567874L);
+            Object[] weekdays = {
+                    new Object(){String weekday = "mon";},
+                    new Object(){String weekday = "tue";},
+                    new Object(){String weekday = "wed";},
+                    new Object(){String weekday = "thu";},
+                    new Object(){String weekday = "fri";},
+                    new Object(){String weekday = "sat";},
+                    new Object(){String weekday = "sun";}
+                    };
+        }));
+    }
 }
